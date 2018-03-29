@@ -24,7 +24,7 @@ namespace rm.Timers
 		/// <summary>
 		/// Index for current round.
 		/// </summary>
-		private int roundi;
+		private uint? roundi;
 
 		/// <summary>
 		/// Bool to denote if round or break is in progress.
@@ -42,14 +42,14 @@ namespace rm.Timers
 			uint longbreakTimeInSeconds,
 			ushort numberOfRounds)
 		{
-			tasks = new Queue<int>();
-			timer = new Timer();
-			stopwatch = new Stopwatch();
-
 			this.roundTimeInSeconds = roundTimeInSeconds;
 			this.breakTimeInSeconds = breakTimeInSeconds;
 			this.longbreakTimeInSeconds = longbreakTimeInSeconds;
 			this.numberOfRounds = numberOfRounds;
+
+			tasks = new Queue<int>();
+			timer = new Timer();
+			stopwatch = new Stopwatch();
 		}
 
 		/// <summary>
@@ -133,7 +133,7 @@ namespace rm.Timers
 		private void StartRound()
 		{
 			StopTicking();
-			NextRound();
+			roundi = ((roundi + 1) % numberOfRounds) ?? 0;
 			Notify($"starting round {roundi}...");
 			isInRound = !isInRound;
 			timer.Interval = GetIntervalInMilliseconds();
@@ -157,20 +157,12 @@ namespace rm.Timers
 
 		/// <remarks>
 		/// We want to increment before starting a round to get correct round or break
-		/// interval so <see cref="roundi"/> is -1.
+		/// interval so <see cref="roundi"/> is null.
 		/// </remarks>
 		private void ResetInner()
 		{
-			roundi = -1;
+			roundi = null;
 			isInRound = false;
-		}
-
-		/// <summary>
-		/// Increments <see cref="roundi"/> and wraps around <see cref="numberOfRounds"/>.
-		/// </summary>
-		private void NextRound()
-		{
-			roundi = (roundi + 1) % numberOfRounds;
 		}
 
 		/// <summary>
